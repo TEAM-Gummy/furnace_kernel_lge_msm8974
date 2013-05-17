@@ -539,18 +539,6 @@ static struct msm_gpiomux_config msm_epm_configs[] __initdata = {
 			[GPIOMUX_SUSPENDED] = &gpio_epm_config,
 		},
 	},
-	{
-		.gpio      = 85,		/* EPM MARKER2 */
-		.settings = {
-			[GPIOMUX_SUSPENDED] = &gpio_epm_marker_config,
-		},
-	},
-	{
-		.gpio      = 96,		/* EPM MARKER1 */
-		.settings = {
-			[GPIOMUX_SUSPENDED] = &gpio_epm_marker_config,
-		},
-	},
 };
 
 static struct msm_gpiomux_config msm_blsp_configs[] __initdata = {
@@ -1424,8 +1412,7 @@ void __init msm_8974_init_gpiomux(void)
 	if (of_board_is_cdp())
 		msm_gpiomux_install(msm8974_sec_auxpcm_configs,
 				 ARRAY_SIZE(msm8974_sec_auxpcm_configs));
-	else if (of_board_is_liquid() || of_board_is_fluid() ||
-						of_board_is_mtp())
+	else
 		msm_gpiomux_install(msm_epm_configs,
 				ARRAY_SIZE(msm_epm_configs));
 

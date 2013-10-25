@@ -59,7 +59,7 @@ static struct scalable scalable[] __initdata = {
 #ifdef CONFIG_CPU_OVERCLOCK
 		.vreg[VREG_CORE] = { "krait0",     1200000 },
 #else
-		.vreg[VREG_CORE] = { "krait0",     1100000 },
+		.vreg[VREG_CORE] = { "krait0",     1120000 },
 #endif
 		.vreg[VREG_MEM]  = { "krait0_mem", 1050000 },
 		.vreg[VREG_DIG]  = { "krait0_dig", LVL_HIGH },
@@ -72,7 +72,7 @@ static struct scalable scalable[] __initdata = {
 #ifdef CONFIG_CPU_OVERCLOCK
 		.vreg[VREG_CORE] = { "krait1",     1200000 },
 #else
-		.vreg[VREG_CORE] = { "krait1",     1100000 },
+		.vreg[VREG_CORE] = { "krait1",     1120000 },
 #endif
 		.vreg[VREG_MEM]  = { "krait1_mem", 1050000 },
 		.vreg[VREG_DIG]  = { "krait1_dig", LVL_HIGH },
@@ -85,7 +85,7 @@ static struct scalable scalable[] __initdata = {
 #ifdef CONFIG_CPU_OVERCLOCK
 		.vreg[VREG_CORE] = { "krait2",     1200000 },
 #else
-		.vreg[VREG_CORE] = { "krait2",     1100000 },
+		.vreg[VREG_CORE] = { "krait2",     1120000 },
 #endif
 		.vreg[VREG_MEM]  = { "krait2_mem", 1050000 },
 		.vreg[VREG_DIG]  = { "krait2_dig", LVL_HIGH },
@@ -98,7 +98,7 @@ static struct scalable scalable[] __initdata = {
 #ifdef CONFIG_CPU_OVERCLOCK
 		.vreg[VREG_CORE] = { "krait3",     1200000 },
 #else
-		.vreg[VREG_CORE] = { "krait3",     1100000 },
+		.vreg[VREG_CORE] = { "krait3",     1120000 },
 #endif
 		.vreg[VREG_MEM]  = { "krait3_mem", 1050000 },
 		.vreg[VREG_DIG]  = { "krait3_dig", LVL_HIGH },

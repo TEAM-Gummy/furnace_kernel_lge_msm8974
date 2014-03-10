@@ -41,6 +41,7 @@
 #include <mach/rpm-regulator-smd.h>
 #include <mach/socinfo.h>
 #include <mach/msm_smem.h>
+#include <mach/msm_bus_board.h>
 #include "../board-dt.h"
 #include "../clock.h"
 #include "../devices.h"

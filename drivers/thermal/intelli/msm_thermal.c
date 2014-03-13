@@ -11,7 +11,7 @@
  *
  * Added code to work as a standalone intelligent thermal throttling driver
  * for many Qualcomm SOCs by Paul Reioux (Faux123)
- * Modifications copyright (c) 2013
+ * Modifications copyright (c) 2013~2014
  *
  */
 
@@ -41,9 +41,9 @@ static struct msm_thermal_stat_data msm_thermal_stats;
 
 static int enabled;
 static struct msm_thermal_data msm_thermal_info = {
-	.sensor_id = 0,
+	.sensor_id = 5,
 	.poll_ms = 250,
-	.limit_temp_degC = 75,
+	.limit_temp_degC = 80,
 	.temp_hysteresis_degC = 10,
 	.freq_step = 2,
 	.freq_control_mask = 0xf,
@@ -51,8 +51,9 @@ static struct msm_thermal_data msm_thermal_info = {
 	.core_temp_hysteresis_degC = 10,
 	.core_control_mask = 0xe,
 };
-static uint32_t limited_max_freq = MSM_CPUFREQ_NO_LIMIT;
+static uint32_t limited_max_freq_thermal = MSM_CPUFREQ_NO_LIMIT;
 static struct delayed_work check_temp_work;
+static struct workqueue_struct *intellithermal_wq;
 static bool core_control_enabled;
 static uint32_t cpus_offlined;
 static DEFINE_MUTEX(core_control_mutex);
@@ -67,14 +68,12 @@ static uint32_t hist_index = 0;
 module_param_named(poll_ms, msm_thermal_info.poll_ms, uint, 0664);
 module_param_named(limit_temp_degC, msm_thermal_info.limit_temp_degC,
 			int, 0664);
-module_param_named(core_limit_temp_degC, msm_thermal_info.core_limit_temp_degC,
-			int, 0664);
-#if 0
 module_param_named(freq_control_mask, msm_thermal_info.freq_control_mask,
 			uint, 0664);
+module_param_named(core_limit_temp_degC, msm_thermal_info.core_limit_temp_degC,
+			int, 0664);
 module_param_named(core_control_mask, msm_thermal_info.core_control_mask,
 			uint, 0664);
-#endif
 
 module_param_named(thermal_limit_high, limit_idx_high, int, 0644);
 module_param_named(thermal_limit_low, limit_idx_low, int, 0644);
@@ -109,7 +108,7 @@ static int update_cpu_max_freq(int cpu, uint32_t max_freq)
 	if (ret)
 		return ret;
 
-	limited_max_freq = max_freq;
+	limited_max_freq_thermal = max_freq;
 	if (max_freq != MSM_CPUFREQ_NO_LIMIT)
 		pr_info("%s: Limiting cpu%d max frequency to %d\n",
 				KBUILD_MODNAME, cpu, max_freq);
@@ -189,7 +188,7 @@ static void __ref do_freq_control(long temp)
 {
 	int ret = 0;
 	int cpu = 0;
-	uint32_t max_freq = limited_max_freq;
+	uint32_t max_freq = limited_max_freq_thermal;
 
 	if (temp >= msm_thermal_info.limit_temp_degC) {
 		if (limit_idx == limit_idx_low)
@@ -212,7 +211,7 @@ static void __ref do_freq_control(long temp)
 			max_freq = table[limit_idx].frequency;
 	}
 
-	if (max_freq == limited_max_freq)
+	if (max_freq == limited_max_freq_thermal)
 		return;
 
 
@@ -264,7 +263,7 @@ static void __ref check_temp(struct work_struct *work)
 	//pr_info("msm_thermal: worker is alive!\n");
 reschedule:
 	if (enabled)
-		schedule_delayed_work(&check_temp_work,
+		queue_delayed_work(intellithermal_wq, &check_temp_work,
 				msecs_to_jiffies(msm_thermal_info.poll_ms));
 }
 
@@ -302,9 +301,7 @@ static void __ref disable_msm_thermal(void)
 	int cpu = 0;
 
 
-	cancel_delayed_work_sync(&check_temp_work);
-	//flush_scheduled_work();
-
+	flush_workqueue(intellithermal_wq);
 
 	for_each_possible_cpu(cpu) {
 		update_cpu_max_freq(cpu, MSM_CPUFREQ_NO_LIMIT);
@@ -322,7 +319,8 @@ static int __ref set_enabled(const char *val, const struct kernel_param *kp)
 	} else {
 		if (!enabled) {
 			enabled = 1;
-			schedule_delayed_work(&check_temp_work, 0);
+			queue_delayed_work(intellithermal_wq,
+					   &check_temp_work, 0);
 			pr_info("msm_thermal: rescheduling...\n");
 		} else
 			pr_info("msm_thermal: already running...\n");
@@ -581,8 +579,10 @@ int __init msm_thermal_init(struct msm_thermal_data *pdata)
 	enabled = 1;
 	if (num_possible_cpus() > 1)
 		core_control_enabled = 1;
+	intellithermal_wq = alloc_workqueue("intellithermal",
+				WQ_UNBOUND | WQ_MEM_RECLAIM, 1);
 	INIT_DELAYED_WORK(&check_temp_work, check_temp);
-	schedule_delayed_work(&check_temp_work, 0);
+	queue_delayed_work(intellithermal_wq, &check_temp_work, 0);
 
 	if (num_possible_cpus() > 1)
 		register_cpu_notifier(&msm_thermal_cpu_notifier);

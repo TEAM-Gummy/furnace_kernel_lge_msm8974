@@ -195,9 +195,9 @@ void __init msm8974_add_drivers(void)
 	msm_init_modem_notifier_list();
 	msm_smd_init();
 	msm_rpm_driver_init();
-	msm_pm_sleep_status_init();
 	rpm_regulator_smd_driver_init();
 	msm_spm_device_init();
+	msm_pm_sleep_status_init(); // I have no fucking idea why the korean variant already had pm-8x60...
 	krait_power_init();
 	if (of_board_is_rumi())
 		msm_clock_init(&msm8974_rumi_clock_init_data);

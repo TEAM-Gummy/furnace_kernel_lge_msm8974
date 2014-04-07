@@ -1,7 +1,7 @@
 #!/bin/bash
 build=/home/savoca/furnace_output/aosp
 kernel="furnace"
-version="1.8.0"
+version="2.0.0"
 rom="aosp"
 ramdisk=ramdisk
 toolchain=/home/savoca/toolchains/arm-eabi-4.7/bin/
